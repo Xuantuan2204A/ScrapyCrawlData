@@ -10,12 +10,24 @@
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 encoding="utf-8"
-
 BOT_NAME = 'TestScrapy'
-
 SPIDER_MODULES = ['TestScrapy.spiders']
 NEWSPIDER_MODULE = 'TestScrapy.spiders'
+# Obey robots.txt rules
+ROBOTSTXT_OBEY = False
+ITEM_PIPELINES = {
+   'TestScrapy.pipelines.MySQLPipeline': 100,
+}
 
+
+
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+# Mysql database connection, here is my database information
+MYSQL_HOST = 'localhost'
+MYSQL_DB_NAME = 'News'
+MYSQL_USER = 'root'
+MYSQL_PASSWORD = ''
+MYSQL_PORT =3306
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'TestScrapy (+http://www.yourdomain.com)'
 

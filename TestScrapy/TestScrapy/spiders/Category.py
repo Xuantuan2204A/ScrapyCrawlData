@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+from cgitb import text
 import scrapy
-import mysql
-
+from TestScrapy.items import NewItem
+from scrapy.linkextractors import LinkExtractor
 
 class CategorySpider(scrapy.Spider):
     name = "basic"
@@ -16,14 +18,10 @@ class CategorySpider(scrapy.Spider):
             page_url = page.xpath('./@href').extract_first()
             yield scrapy.Request(url = page_url, callback=self.parse)
     def parse(self, response):
-        postTitle = response.xpath("//div[@class='tdb-block-inner td-fix-index']//h1/text()").extract_first()
-        postIntro = response.xpath("//meta[@name='description']/@content").extract_first()
-        postContent = response.xpath("//div[@class='meta-related']/p//text() [not(ancestor::strong)]").extract_first()
-        postCreatedat = response.xpath("//div[@class='tdb-block-inner td-fix-index']//time/@datetime").extract_first()
-
-        yield {
-            'title': postTitle,
-            'introl': postIntro,
-            'content': postContent,
-            'createdat': postCreatedat,
-        }
+        item=NewItem()
+        item['Url'] = response.xpath(".//link[@rel='canonical']//@href").extract_first()
+        item['Title'] = response.xpath(".//div[@class='tdb-block-inner td-fix-index']//h1/text()").extract_first()
+        item['Intro'] = response.xpath(".//meta[@name='description']/@content").extract_first()
+        item['Content'] = response.xpath("//div[contains(@class,'meta-related')]/p//text() [not(ancestor::strong)]").extract()
+        item['Createdate'] = response.xpath(".//meta[@property='article:published_time']/@content").extract_first()
+        yield item
