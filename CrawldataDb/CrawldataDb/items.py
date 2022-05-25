@@ -3,13 +3,15 @@
 # Define here the models for your scraped items
 #
 # See documentation in:
-# https://docs.scrapy.org/en/latest/topics/items.html
+# https://doc.scrapy.org/en/latest/topics/items.html
 
 from scrapy.item import Item, Field
  
-class NewItem(Item):
+class CrawldatadbItem(Item):
+    Category = Field()
     Url = Field()
     Title = Field()
-    Intro = Field()
+    Introl = Field()
     Content = Field()
     Createdate = Field()
+    
