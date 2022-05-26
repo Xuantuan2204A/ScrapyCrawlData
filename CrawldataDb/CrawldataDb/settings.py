@@ -15,6 +15,18 @@ SPIDER_MODULES = ['CrawldataDb.spiders']
 NEWSPIDER_MODULE = 'CrawldataDb.spiders'
 
 
+ITEM_PIPELINES = {
+   'CrawldataDb.pipelines.CrawldatadbPipeline': 100,
+}
+FEED_EXPORT_ENCODING = 'utf-8'
+
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+# Mysql database connection, here is my database information
+MYSQL_HOST = 'localhost'
+MYSQL_DB_NAME = 'News'
+MYSQL_USER = 'root'
+MYSQL_PASSWORD = ''
+MYSQL_PORT =3306
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'CrawldataDb (+http://www.yourdomain.com)'
 
