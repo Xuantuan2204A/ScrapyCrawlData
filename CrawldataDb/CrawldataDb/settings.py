@@ -20,7 +20,7 @@ ITEM_PIPELINES = {
 }
 FEED_EXPORT_ENCODING = 'utf-8'
 
-DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+DATETIME_FORMAT = "%y-%m-%d %H:%M:%S"
 # Mysql database connection, here is my database information
 MYSQL_HOST = 'localhost'
 MYSQL_DB_NAME = 'News'
