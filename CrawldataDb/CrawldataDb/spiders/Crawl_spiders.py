@@ -53,25 +53,25 @@ class CategorySpider(scrapy.Spider):
     #         self.start_urls.append(url + str(page))
     #     yield scrapy.Request(url=url, callback=self.parseUrl)
 
-    # def parsePage(self, response):
-    #     for pageurl in response.xpath("//section[@id='content']/div//div/h2/a"):
-    #         page_url1 = pageurl.xpath('./@href').extract_first()
-    #         yield scrapy.Request(url=page_url1, callback=self.parse)
+    def parsePage(self, response):
+        for pageurl in response.xpath("//section[@id='content']/div//div/h2/a"):
+            page_url1 = pageurl.xpath('./@href').extract_first()
+            yield scrapy.Request(url=page_url1, callback=self.parse)
 
-    # def parse(seft, response):
+    def parse(seft, response):
 
-    #     item = CrawldatadbItem()
-    #     item['Category'] = response.xpath(
-    #         ".//meta[@property='article:section']/@content").extract_first()
-    #     item['Url'] = response.xpath(
-    #         ".//link[@rel='canonical']/@href").extract_first()
-    #     item['Title'] = response.xpath(".//h1//text()").extract_first()
-    #     item['Introl'] = response.xpath(
-    #         ".//meta[@name='twitter:description']/@content").extract_first()
-    #     item['Content'] = response.xpath(
-    #         ".//div[@id='post-template']/p//text()").extract()
-    #     item['Createdate'] = response.xpath(
-    #         "..//p[@class='date']//text()").extract_first()
-    #     # yield item
+        item = CrawldatadbItem()
+        item['Category'] = response.xpath(
+            ".//meta[@property='article:section']/@content").extract_first()
+        item['Url'] = response.xpath(
+            ".//link[@rel='canonical']/@href").extract_first()
+        item['Title'] = response.xpath(".//h1//text()").extract_first()
+        item['Introl'] = response.xpath(
+            ".//meta[@name='twitter:description']/@content").extract_first()
+        item['Content'] = response.xpath(
+            ".//div[@id='post-template']/p//text()").extract()
+        item['Createdate'] = response.xpath(
+            "..//p[@class='date']//text()").extract_first()
+        # yield item
 
-    #     print(item)
+        print(item)
