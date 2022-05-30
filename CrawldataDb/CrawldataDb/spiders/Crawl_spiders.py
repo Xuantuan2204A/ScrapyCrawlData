@@ -3,19 +3,18 @@ from CrawldataDb.items import CrawldatadbItem
 # from CrawldataDb.items import NewItem
 from scrapy.conf import settings
 import pymysql
+import redis
 
 
 class CategorySpider(scrapy.Spider):
     name = "thegioihoinhap"
-
-    visited_urls = []
-    visited_datetimes = []
 
     def __init__(self, *args, **kwargs):
         self.urls = [
             'https://thegioihoinhap.vn/'
         ]
         self.create_connection()
+        self.redis_db = redis.Redis(host=settings['REDIS_HOST'], port=settings['REDIS_PORT'], db=settings['REDIS_DB_ID'])
 
     def create_connection(self):
         self.conn = pymysql.connect(
@@ -34,32 +33,71 @@ class CategorySpider(scrapy.Spider):
         mycursor.execute("SELECT Category_url FROM Category_website")
         myresult = mycursor.fetchall()
         for url in myresult:
-            print(url)
-        # for url in url:
-            # yield scrapy.Request(url=url, callback=self.parsePage)
+            yield scrapy.Request(url=url[0], callback=self.parsePage)
 
-    # def parsePage(self, response):
-    #     item = CrawldatadbItem()
-    #     for page in response.xpath(".//ul[@class='menu']/li/a [not(ancestor::nav[@class='footer-menu']) and not(ancestor::li[@id='menu-item-8476'])] | //ul[@class='menu']/li/ul/li/a [not(ancestor::nav[@class='footer-menu'])]"):
-    #         item['Category_url'] = page.xpath('./@href').extract_first()
-    #         item['Category_name'] = page.xpath('.//text()').extract_first()
-    #         yield item
-            # yield scrapy.Request(url=item['Category_url'], callback=self.parseUrl)
-
-    # def parsePagemini(self, response):
-    #     url = response.xpath(
-    #         ".//ul[@class='menu']/li/a/@href [not(ancestor::nav[@class='footer-menu']) and not(ancestor::li[@id='menu-item-8476'])] | //ul[@class='menu']/li/ul/li/a/@href [not(ancestor::nav[@class='footer-menu'])]").extract_first()
-    #     for page in range(0, 20):
-    #         self.start_urls.append(url + str(page))
-    #     yield scrapy.Request(url=url, callback=self.parseUrl)
 
     def parsePage(self, response):
         for pageurl in response.xpath("//section[@id='content']/div//div/h2/a"):
             page_url1 = pageurl.xpath('./@href').extract_first()
-            yield scrapy.Request(url=page_url1, callback=self.parse)
+            # if page_url1 not in self.media_urls:
+            #     string= str(page_url1).encode('utf-8')
+            #     key_insert = hashlib.md5(str(string).decode('utf-8').encode('utf-8')).hexdigest()
+            #     duplicate = self.redis_exists(key_insert)
+            #     if duplicate == True:
+            #         print("ITEM ALREADY EXISTS DON'T REQUEST AGAIN")
+            #     else:
+            #         yield Request(url=page_url1, callback=self.parsePage)
+            # # yield scrapy.Request(url=page_url1, callback=self.parse)
 
+
+            
+            # if post_url not in self.visited_urls:
+            #     if post_url not in self.media_urls:
+            #         # if meta_req["domain"] == "nongnghiep.vn":
+            #         #     meta_req['domain'] = meta_req['domain'].replace("‘", "")
+
+            #         string = str(post_url.encode('utf-8')) + "_" + str(meta_req['domain'])
+            #         key_insert = hashlib.md5(str(string).decode('utf-8').encode('utf-8')).hexdigest()
+            #         # print "==================================="
+            #         # print post_url
+            #         # print key_insert
+            #         # print "==================================="
+
+            #         duplicate = self.redis_exists(key_insert)
+
+            #         # IF NGÀY ĐĂNG LÀ 2021-05-03 or 2021-05-04 
+            #         # duplicate = False
+
+            #         if duplicate == True:
+            #             print "[INFO] ITEM ALREADY EXISTS DON'T REQUEST AGAIN"
+            #             print "[INFO] THE KEY: " + key_insert
+            #             print "[INFO] THE WEB LINK : " + str(post_url.encode("utf-8"))
+            #         else:
+            #             # print "============= REQUEST TRUE ============="
+            #             # print post_url
+            #             # print "=========================================="
+            #             yield Request(post_url, callback=self.parse_full_post, meta=meta_req)
+            #     else:
+            #         # print "============== FILTER MEDIA =============="
+            #         # print post_url
+            #         # print "=========================================="
+            #         logging.info( "[FILTER MEDIA] request filtered " + post_url)
+            # else:
+            #     # print "============== FILTER REQUEST =============="
+            #     # print post_url
+            #     # print "============================================"
+            #     logging.info( "[FILTER] request filtered " + post_url)
+            #     self.to_update_urls.append(post_url)
+
+
+    def redis_exists(self,key):
+        val = self.redis_db.get(key)
+        if val == "exist":
+            return True
+        return False
+
+    
     def parse(seft, response):
-
         item = CrawldatadbItem()
         item['Category'] = response.xpath(
             ".//meta[@property='article:section']/@content").extract_first()
@@ -72,6 +110,6 @@ class CategorySpider(scrapy.Spider):
             ".//div[@id='post-template']/p//text()").extract()
         item['Createdate'] = response.xpath(
             "..//p[@class='date']//text()").extract_first()
-        # yield item
+        yield item
 
-        print(item)
+        # print(item)
