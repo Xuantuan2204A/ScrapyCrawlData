@@ -4,26 +4,21 @@ from scrapy.conf import settings
 from scrapy.xlib.pydispatch import dispatcher
 from scrapy import Spider, signals
 from scrapy.exporters import JsonItemExporter
-
+import redis
 
 class CrawldatadbPipeline(object):
 
     def __init__(self, *args, **kwargs):
         self.create_connection()
-        
+
         self.dataformat = settings['DATETIME_FORMAT']
         self.fonttext = settings['FEED_EXPORT_ENCODING']
-        self.redis_db = redis.Redis(host=settings['REDIS_HOST'], port=settings['REDIS_PORT'], db=settings['REDIS_DB_ID'])
+        self.redis_db = redis.Redis(
+            host=settings['REDIS_HOST'], port=settings['REDIS_PORT'], db=settings['REDIS_DB_ID'])
 
     def process_item(self, item, spider):
-        # self.insert_dataCategory(item)
-        # self.conn.lpush('xiaoshuo', item)
-        # print(' data storage redis success ！')
         self.insertdata(item)
         return item
-    
-    def close_spider(self, spider):
-            self.conn.close()
 
     def create_connection(self):
         self.conn = pymysql.connect(
@@ -38,6 +33,14 @@ class CrawldatadbPipeline(object):
         print("Database connection successful")
 
     def insertdata(self, item):
+        string = str(item['Url'].encode('utf-8'))
+        key_insert = hashlib.md5(str(string).decode(
+            'utf-8').encode('utf-8')).hexdigest()
+        duplicate = self.redis_exists(key_insert)
+        print "=========="
+        print "[INFO] KEY HASH: " + key_insert
+        print "=========="
+
         thoigian_format = item['Createdate']
         thoigian_format = datetime.strptime(
             thoigian_format, ' %H:%M - %d/%m/%Y')
@@ -47,7 +50,7 @@ class CrawldatadbPipeline(object):
             content_full = content_full + " " + content
         values = (  # This is the value we want to pass into the database
             item['Category'],
-            item['Url'],
+            key_insert,
             item['Title'],
             item['Introl'],
             content_full,
@@ -58,16 +61,23 @@ class CrawldatadbPipeline(object):
             # SQL statement
             sql = 'INSERT INTO dataweb VALUES (%s,%s,%s,%s,%s,%s)'
             self.curr.execute(sql, values)  # Execute with execute
+            self.insert_key_to_redis(key_insert)
             print("Data inserted successfully")
         except Exception as e:
             print('Insert error:', e)
             self.conn.rollback()
         else:
             self.conn.commit()  # Every time you insert it, you commit it, and the data is saved
-# Data stored in redis in
 
-    def redis_exists(self,key):
-        val = self.redis_db.get(key)
-        if val == "exist":
+    def insert_key_to_redis(self, key):
+        nano = self.redis_db.mset(key, "exists")
+
+    def redis_exists(self, key):
+        val = self.redis_db.mget(key)
+        print "==== pipelines ===="
+        print key
+        print val
+        print "===="
+        if val == "exists":
             return True
         return False

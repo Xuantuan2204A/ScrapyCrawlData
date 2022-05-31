@@ -14,7 +14,7 @@ BOT_NAME = 'CrawldataDb'
 SPIDER_MODULES = ['CrawldataDb.spiders']
 NEWSPIDER_MODULE = 'CrawldataDb.spiders'
 
-
+DELTAFETCH_ENABLED = True
 ITEM_PIPELINES = {
    'CrawldataDb.pipelines.CrawldatadbPipeline': 100,
 }
@@ -33,6 +33,10 @@ MYSQL_PORT =3306
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
+
+REDIS_HOST = '127.0.0.1'
+REDIS_PORT = 6379
+REDIS_DB_ID = 1
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
