@@ -1,4 +1,5 @@
 from datetime import datetime
+import hashlib
 import pymysql
 from scrapy.conf import settings
 from scrapy.xlib.pydispatch import dispatcher
@@ -36,11 +37,6 @@ class CrawldatadbPipeline(object):
         string = str(item['Url'].encode('utf-8'))
         key_insert = hashlib.md5(str(string).decode(
             'utf-8').encode('utf-8')).hexdigest()
-        duplicate = self.redis_exists(key_insert)
-        print "=========="
-        print "[INFO] KEY HASH: " + key_insert
-        print "=========="
-
         thoigian_format = item['Createdate']
         thoigian_format = datetime.strptime(
             thoigian_format, ' %H:%M - %d/%m/%Y')
@@ -70,14 +66,10 @@ class CrawldatadbPipeline(object):
             self.conn.commit()  # Every time you insert it, you commit it, and the data is saved
 
     def insert_key_to_redis(self, key):
-        nano = self.redis_db.mset(key, "exists")
-
+        nano = self.redis_db.set(key, "exist")
+    
     def redis_exists(self, key):
-        val = self.redis_db.mget(key)
-        print "==== pipelines ===="
-        print key
-        print val
-        print "===="
-        if val == "exists":
+        val = self.redis_db.get(key)
+        if val == "exist":
             return True
         return False
