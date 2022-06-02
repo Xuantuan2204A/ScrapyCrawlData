@@ -2,16 +2,11 @@ from datetime import datetime
 import hashlib
 import pymysql
 from scrapy.conf import settings
-from scrapy.xlib.pydispatch import dispatcher
-from scrapy import Spider, signals
-from scrapy.exporters import JsonItemExporter
 import redis
 
 class CrawldatadbPipeline(object):
-
     def __init__(self, *args, **kwargs):
         self.create_connection()
-
         self.dataformat = settings['DATETIME_FORMAT']
         self.fonttext = settings['FEED_EXPORT_ENCODING']
         self.redis_db = redis.Redis(

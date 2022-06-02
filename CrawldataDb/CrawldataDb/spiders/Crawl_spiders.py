@@ -1,6 +1,5 @@
 import scrapy
 from CrawldataDb.items import CrawldatadbItem
-# from CrawldataDb.items import NewItem
 from scrapy.conf import settings
 import pymysql
 import redis
@@ -10,8 +9,6 @@ import hashlib
 class CategorySpider(scrapy.Spider):
     name = "thegioihoinhap"
 
-    service_id = 0
-    allowed_domains = ["example.com"]
     # urls = [
     #         'https://thegioihoinhap.vn/'
     #     ]
@@ -19,12 +16,8 @@ class CategorySpider(scrapy.Spider):
         'scrapy_deltafetch.DeltaFetch ':  100,
     }
 
-    def __init__(self,url=None, cate = None, debug=None, *args, **kwargs):
+    def __init__(self,name=None, url=None, *args, **kwargs):
     
-        self.crawl_one_url = url
-        self.crawl_one_cate = cate
-        self.debug= debug
-        # self.count = 1
         self.create_connection()
         self.redis_db = redis.Redis(
             host=settings['REDIS_HOST'], port=settings['REDIS_PORT'], db=settings['REDIS_DB_ID'])
@@ -42,28 +35,10 @@ class CategorySpider(scrapy.Spider):
         print("Database connection successful")
 
     def start_requests(self):
-        print("===")
-        print("BEGIN CRAWLER WEBSITE ") + self.allowed_domains[0]
-        print("===")
-        # page = 1
-        # cf_domain = self.allowed_domains[0]
-        # parser_xpath = self.get_xpaths()
-        # if parser_xpath:
-        #     if self.crawl_one_url == None and self.crawl_one_cate == None :
-        #         list_data = DispatcherLibrary(self.service_id, self.group).getCateUrls(cf_domain)
-
-        #     elif self.crawl_one_url != None and self.crawl_one_cate == None :
-        #         Pass
-        #     elif self.crawl_one_url == None and self.crawl_one_cate != None :
-        #         Pass
-        #     else:
-        #         print("[Error] GET XPATH IN DB ERROR")
-
-
+        item= CrawldatadbItem()
         mycursor = self.conn.cursor()
-        mycursor.execute("SELECT * FROM Category_website")
+        mycursor.execute("SELECT Category_url, Category_name FROM Category_website")
         myresult = mycursor.fetchall()
-        # print myresult
         for url in myresult:
             yield scrapy.Request(url=url[0], callback=self.parsePage)
 
@@ -76,9 +51,8 @@ class CategorySpider(scrapy.Spider):
             duplicate = self.redis_exists(key_insert)
             self.insert_key_to_redis(key_insert)
             if duplicate == True:
-                # if key_insert == "ff1542449dae5dc0d82b21f7496ae066":
-                #     # self.delete_key_to_redis(key_insert)
                 print("[INFO][DEBUG] ITEM ALREADY EXISTS DON'T REQUEST AGAIN")
+                # self.delete_key_to_redis(key_insert)
             else:
                 yield scrapy.Request(url=page_url, callback=self.parse)
 
@@ -105,9 +79,9 @@ class CategorySpider(scrapy.Spider):
             "..//p[@class='date']//text()").extract_first()
         yield item
 
-    # def delete_key_to_redis(self, key):
-    #     try:
-    #         self.redis_db.delete(key)
-    #         print "[INFO][DEBUG] Remove Key Success"
-    #     except Exception as e:
-    #         print "[INFO][ERROR] Remove Key Error: "+str(e)
+    def delete_key_to_redis(self, key):
+        try:
+            self.redis_db.delete(key)
+            print( "[INFO][DEBUG] Remove Key Success")
+        except Exception as e:
+            print( "[INFO][ERROR] Remove Key Error: "+str(e))
