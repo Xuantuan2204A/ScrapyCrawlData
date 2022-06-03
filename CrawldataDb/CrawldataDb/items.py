@@ -17,4 +17,5 @@ class CrawldatadbItem(Item):
     Createdate = Field()
     Category_url = Field()
     Category_name = Field()
-    
+    pageurl = Field()    
+    page_url = Field()

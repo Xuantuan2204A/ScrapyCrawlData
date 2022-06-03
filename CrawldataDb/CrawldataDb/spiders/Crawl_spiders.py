@@ -6,9 +6,9 @@ import redis
 import hashlib
 
 
-class CategorySpider(scrapy.Spider):
+class CategorySpider(scrapy.spiders.Spider):
     name = "thegioihoinhap"
-
+    
     # urls = [
     #         'https://thegioihoinhap.vn/'
     #     ]
@@ -17,11 +17,11 @@ class CategorySpider(scrapy.Spider):
     }
 
     def __init__(self,name=None, url=None, *args, **kwargs):
-    
+        self.url =url
         self.create_connection()
         self.redis_db = redis.Redis(
             host=settings['REDIS_HOST'], port=settings['REDIS_PORT'], db=settings['REDIS_DB_ID'])
-
+        super(CategorySpider, self).__init__(*args, **kwargs)
     def create_connection(self):
         self.conn = pymysql.connect(
             db=settings['MYSQL_DB_NAME'],
@@ -35,17 +35,22 @@ class CategorySpider(scrapy.Spider):
         print("Database connection successful")
 
     def start_requests(self):
-        item= CrawldatadbItem()
-        mycursor = self.conn.cursor()
-        mycursor.execute("SELECT Category_url, Category_name FROM Category_website")
-        myresult = mycursor.fetchall()
-        for url in myresult:
-            yield scrapy.Request(url=url[0], callback=self.parsePage)
+        item = CrawldatadbItem()
+        # self.logger.info('Start url: %s' % self.url)
+        # yield scrapy.Request(url=self.url, callback=self.parse)
 
+        mycursor = self.conn.cursor()
+        mycursor.execute("SELECT * FROM Category_website")
+        myresult = mycursor.fetchall()
+        for item['Category_url'] in myresult:
+            print(item['Category_url'][1])
+            # yield scrapy.Request(url=item['Category_url'],meta={'Category_url': item['Category_url']}, callback=self.parsePage)
+            
     def parsePage(self, response):
-        for pageurl in response.xpath("//section[@id='content']/div//div/h2/a"):
-            page_url = pageurl.xpath('./@href').extract_first()
-            string = str(page_url.encode('utf-8'))
+        item = CrawldatadbItem()
+        for item['pageurl'] in response.xpath("//section[@id='content']/div//div/h2/a"):
+            item['page_url'] = item['pageurl'].xpath('./@href').extract_first()
+            string = str(item['page_url'].encode('utf-8'))
             key_insert = hashlib.md5(str(string).decode(
                 'utf-8').encode('utf-8')).hexdigest()
             duplicate = self.redis_exists(key_insert)
@@ -54,7 +59,7 @@ class CategorySpider(scrapy.Spider):
                 print("[INFO][DEBUG] ITEM ALREADY EXISTS DON'T REQUEST AGAIN")
                 # self.delete_key_to_redis(key_insert)
             else:
-                yield scrapy.Request(url=page_url, callback=self.parse)
+                yield scrapy.Request(url=item['page_url'], meta={'page_url': item['page_url']}, callback=self.parse)
 
     def redis_exists(self, key):
         val = self.redis_db.get(key)
@@ -76,8 +81,9 @@ class CategorySpider(scrapy.Spider):
         item['Content'] = response.xpath(
             ".//div[@id='post-template']/p//text()").extract()
         item['Createdate'] = response.xpath(
-            "..//p[@class='date']//text()").extract_first()
+            ".//p[@class='date']//text()").extract_first()
         yield item
+
 
     def delete_key_to_redis(self, key):
         try:

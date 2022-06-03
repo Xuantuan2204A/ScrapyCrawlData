@@ -8,12 +8,12 @@ class UrlExtractor(Spider):
     name = 'url-extractor'
     start_urls = []
 
-    def __init__(self, root=None, depth=0, *args, **kwargs):
-        self.logger.info("[LE] Source: %s Depth: %s Kwargs: %s", root, depth, kwargs)
-        self.source = root
+    def __init__(self, url_link=None, depth=0, *args, **kwargs):
+        self.logger.info("Source: %s Depth: %s Kwargs: %s", url_link, depth, kwargs)
+        self.source = url_link
         self.options = kwargs
         self.depth = depth
-        UrlExtractor.start_urls.append(root)
+        UrlExtractor.start_urls.append(url_link)
         UrlExtractor.allowed_domains = [self.options.get('allow_domains')]
         self.clean_options()
         self.le = LinkExtractor(allow=self.options.get('allow'), deny=self.options.get('deny'),
