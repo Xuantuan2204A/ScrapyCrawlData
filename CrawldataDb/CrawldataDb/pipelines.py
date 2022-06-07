@@ -29,28 +29,33 @@ class CrawldatadbPipeline(object):
         print("Database connection successful")
 
     def insertdata(self, item):
-        string = str(item['Url'].encode('utf-8'))
+        string = str(item['url_title'].encode('utf-8'))
         key_insert = hashlib.md5(str(string).decode(
             'utf-8').encode('utf-8')).hexdigest()
-        thoigian_format = item['Createdate']
+
+        string_cateurl = str(item['category_url'].encode('utf-8'))
+        key_insert_cateurl = hashlib.md5(str(string_cateurl).decode(
+            'utf-8').encode('utf-8')).hexdigest()
+
+        thoigian_format = item['createdate']
         thoigian_format = datetime.strptime(
             thoigian_format, ' %H:%M - %d/%m/%Y')
 
         content_full = ""
-        for content in item['Content']:
+        for content in item['content']:
             content_full = content_full + " " + content
         values = (  # This is the value we want to pass into the database
-            item['Category'],
+            key_insert_cateurl,
+            item['category_name'],
             key_insert,
-            item['Title'],
-            item['Introl'],
+            item['title'],
+            item['introl'],
             content_full,
-            # item['Createdate'],
             thoigian_format,
         )
         try:
             # SQL statement
-            sql = 'INSERT INTO dataweb VALUES (%s,%s,%s,%s,%s,%s)'
+            sql = 'INSERT INTO thegioihoinhap VALUES (%s,%s,%s,%s,%s,%s,%s)'
             self.curr.execute(sql, values)  # Execute with execute
             self.insert_key_to_redis(key_insert)
             print("Data inserted successfully")

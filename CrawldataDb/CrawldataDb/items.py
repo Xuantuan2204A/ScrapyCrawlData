@@ -9,13 +9,13 @@ from scrapy.item import Item, Field
 
 
 class CrawldatadbItem(Item):
-    Category = Field()
-    Url = Field()
-    Title = Field()
-    Introl = Field()
-    Content = Field()
-    Createdate = Field()
-    Category_url = Field()
-    Category_name = Field()
+    category = Field()
+    url_title = Field()
+    title = Field()
+    introl = Field()
+    content = Field()
+    createdate = Field()
+    category_url = Field()
+    category_name = Field()
     pageurl = Field()    
     page_url = Field()
