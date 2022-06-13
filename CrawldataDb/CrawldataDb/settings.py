@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = 'CrawldataDb.spiders'
 
 DELTAFETCH_ENABLED = True
 ITEM_PIPELINES = {
-   'CrawldataDb.pipelines.CrawldatadbPipeline': 100,
+   'CrawldataDb.pipelines.CrawldatadbPipeline': 100
 }
 FEED_EXPORT_ENCODING = 'utf-8'
 
@@ -38,6 +38,14 @@ REDIS_HOST = '127.0.0.1'
 REDIS_PORT = 6379
 REDIS_DB_ID = 3
 
+
+# data elasticsearch
+
+ELASTICSEARCH_SERVER = 'localhost' 
+ELASTICSEARCH_PORT = 9200 
+ELASTICSEARCH_INDEX = 'meetups'
+ELASTICSEARCH_TYPE = 'meetup'
+ELASTICSEARCH_UNIQ_KEY = 'link'
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 

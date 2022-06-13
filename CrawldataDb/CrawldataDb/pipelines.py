@@ -3,6 +3,7 @@ import hashlib
 import pymysql
 from scrapy.conf import settings
 import redis
+from elasticsearch import Elasticsearch
 
 class CrawldatadbPipeline(object):
     def __init__(self, *args, **kwargs):
@@ -13,7 +14,7 @@ class CrawldatadbPipeline(object):
             host=settings['REDIS_HOST'], port=settings['REDIS_PORT'], db=settings['REDIS_DB_ID'])
 
     def process_item(self, item, spider):
-        self.insertdata(item)
+        # self.insertdata(item)
         return item
 
     def create_connection(self):
@@ -73,3 +74,45 @@ class CrawldatadbPipeline(object):
         if val == "exist":
             return True
         return False
+
+    # def create_index(self):
+    #     # Connect Elasticsearch
+    #     index_new = 'index_demo'
+    #     es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
+
+    #     # Delete index if exists
+    #     if es.indices.exists(index_new):
+    #         # es.indices.delete(index=index_new)
+    #         print("Index exists !")
+    #     else:
+    #         # index settings
+    #         settings = {
+    #             "settings": {
+    #                 "number_of_shards": 1,
+    #                 "number_of_replicas": 0
+    #             },
+    #             "mappings": {
+    #                 "filtered": {
+    #                     "properties": {
+    #                         "category_url": {
+    #                             "type": "text"
+    #                         },
+    #                         "category_name": {
+    #                             "type": "text"
+    #                         },
+    #                         "url_title": {
+    #                             "type": "text"
+    #                         },
+    #                         "title": {
+    #                             "type": "text"
+    #                         }
+    #                     }
+    #                 }
+    #             }
+    #         }
+    #     # create index
+    #     try:
+    #         es.indices.create(index='tvplus', ignore=400, body=settings)
+    #         print( "Create Index Success !")
+    #     except Exception as e:
+    #         print( "Create Index Error: "+str(e))
