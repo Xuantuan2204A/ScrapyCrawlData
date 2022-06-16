@@ -1,13 +1,13 @@
 #-*- coding: utf-8 -*-
 from elasticsearch import Elasticsearch
-# from elasticsearch_dsl import Search
+from elasticsearch_dsl import Search
 
 es = Elasticsearch([{'host': 'localhost', 'port': 9200}])
-# search = Search(using=ES, index="scrapy")
+search = Search(using=es, index="database_index")
 
-# for hit in search.scan():
-#     name = hit['category_name'];
-#     print(name.encode('utf-8'))
+for hit in search.scan():
+    name = hit['category_name'];
+    print(name.encode('utf-8'))
 q = {
   "script": {
     "source": "ctx._source.category_name='life style'",

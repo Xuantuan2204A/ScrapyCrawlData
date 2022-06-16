@@ -18,6 +18,18 @@ DELTAFETCH_ENABLED = True
 ITEM_PIPELINES = {
    'CrawldataDb.pipelines.CrawldatadbPipeline': 100
 }
+ITEM_PIPELINES = {
+    'scrapyelasticsearch.scrapyelasticsearch.ElasticSearchPipeline': 100
+}
+
+ELASTICSEARCH_SERVERS = ['http://127.0.0.1:9200']
+ELASTICSEARCH_INDEX = 'database_index'
+ELASTICSEARCH_TYPE = 'item'
+ELASTICSEARCH_UNIQ_KEY = 'url_title'
+
+
+
+
 FEED_EXPORT_ENCODING = 'utf-8'
 
 DATETIME_FORMAT = "%y-%m-%d %H:%M:%S"
@@ -41,11 +53,6 @@ REDIS_DB_ID = 3
 
 # data elasticsearch
 
-ELASTICSEARCH_SERVER = 'localhost' 
-ELASTICSEARCH_PORT = 9200 
-ELASTICSEARCH_INDEX = 'meetups'
-ELASTICSEARCH_TYPE = 'meetup'
-ELASTICSEARCH_UNIQ_KEY = 'link'
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 
